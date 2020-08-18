@@ -9,7 +9,7 @@ public class HomeController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
-        String msg = "ecm-api service is running";
+        String msg = "tndhs ecm-api service is running";
         return msg;
     }
 
