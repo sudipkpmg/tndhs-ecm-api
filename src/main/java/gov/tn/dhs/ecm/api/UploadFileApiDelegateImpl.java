@@ -47,9 +47,11 @@ public class UploadFileApiDelegateImpl implements UploadFileApiDelegate {
 
             try {
                 InputStream inputStream = file.getInputStream();
-                BoxFile.Info newFileInfo = parentFolder.uploadFile(inputStream, programId);
+                String fileName = file.getName();
+                BoxFile.Info newFileInfo = parentFolder.uploadFile(inputStream, fileName);
                 inputStream.close();
                 fileId = newFileInfo.getID();
+
                 BoxFile boxFile = new BoxFile(api, fileId);
                 final JsonObject jsonObject = new JsonObject();
                 jsonObject.add("programId", programId);
