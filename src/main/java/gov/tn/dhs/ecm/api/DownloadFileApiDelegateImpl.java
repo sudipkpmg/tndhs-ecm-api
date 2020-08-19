@@ -32,23 +32,7 @@ public class DownloadFileApiDelegateImpl implements DownloadFileApiDelegate {
         logger.info(fileDownloadRequest.toString());
 
         try {
-
-            String clientId = appProperties.getClientID();
-            String clientSecret = appProperties.getClientSecret();
-            String enterpriseID = appProperties.getEnterpriseID();
-            String publicKeyID = appProperties.getPublicKeyID();
-            String privateKey = appProperties.getPrivateKey();
-            String passphrase = appProperties.getPassphrase();
-            BoxConfig boxConfig = new BoxConfig(
-                    clientId,
-                    clientSecret,
-                    enterpriseID,
-                    publicKeyID,
-                    privateKey,
-                    passphrase
-            );
-            BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
-            api.asUser(appProperties.getDownloadOneUserID());
+            BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
 
             String fileId = fileDownloadRequest.getFileId();
             BoxFile file = new BoxFile(api, fileId);
@@ -60,12 +44,31 @@ public class DownloadFileApiDelegateImpl implements DownloadFileApiDelegate {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(bytes.length);
             return new ResponseEntity(inputStreamResource, headers, HttpStatus.OK);
-
         }
         catch (Exception ex) {
             return new ResponseEntity(null, HttpStatus.CONFLICT);
         }
 
+    }
+
+    private BoxDeveloperEditionAPIConnection getBoxDeveloperEditionAPIConnection() {
+        String clientId = appProperties.getClientID();
+        String clientSecret = appProperties.getClientSecret();
+        String enterpriseID = appProperties.getEnterpriseID();
+        String publicKeyID = appProperties.getPublicKeyID();
+        String privateKey = appProperties.getPrivateKey();
+        String passphrase = appProperties.getPassphrase();
+        BoxConfig boxConfig = new BoxConfig(
+                clientId,
+                clientSecret,
+                enterpriseID,
+                publicKeyID,
+                privateKey,
+                passphrase
+        );
+        BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
+        api.asUser(appProperties.getDownloadOneUserID());
+        return api;
     }
 
 

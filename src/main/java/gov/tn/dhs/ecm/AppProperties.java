@@ -21,6 +21,9 @@ public class AppProperties {
 
 	private String developerToken;
 
+	private String citizenFolderMetadataTemplateName;
+	private String citizenFolderMetadataTemplateScope;
+
 	public String getDeveloperToken() {
 		return developerToken;
 	}
@@ -107,6 +110,22 @@ public class AppProperties {
 
 	public void setDownloadThreeUserID(String downloadThreeUserID) {
 		this.downloadThreeUserID = downloadThreeUserID;
+	}
+
+	public String getCitizenFolderMetadataTemplateName() {
+		return citizenFolderMetadataTemplateName;
+	}
+
+	public void setCitizenFolderMetadataTemplateName(String citizenFolderMetadataTemplateName) {
+		this.citizenFolderMetadataTemplateName = citizenFolderMetadataTemplateName;
+	}
+
+	public String getCitizenFolderMetadataTemplateScope() {
+		return citizenFolderMetadataTemplateScope;
+	}
+
+	public void setCitizenFolderMetadataTemplateScope(String citizenFolderMetadataTemplateScope) {
+		this.citizenFolderMetadataTemplateScope = citizenFolderMetadataTemplateScope;
 	}
 
 }

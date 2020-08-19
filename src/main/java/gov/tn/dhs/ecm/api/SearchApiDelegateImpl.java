@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,28 +34,13 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
     public ResponseEntity<List<FileInfo>> searchPost(Query query) {
         logger.info(query.toString());
         try {
-            String clientId = appProperties.getClientID();
-            String clientSecret = appProperties.getClientSecret();
-            String enterpriseID = appProperties.getEnterpriseID();
-            String publicKeyID = appProperties.getPublicKeyID();
-            String privateKey = appProperties.getPrivateKey();
-            String passphrase = appProperties.getPassphrase();
-            BoxConfig boxConfig = new BoxConfig(
-                    clientId,
-                    clientSecret,
-                    enterpriseID,
-                    publicKeyID,
-                    privateKey,
-                    passphrase
-            );
-            BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
-            api.asUser(appProperties.getDownloadOneUserID());
+            BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
             switch (query.getSearchType()) {
                 case FOLDER: {
                     String folderId = query.getSearchCondition();
                     try {
                         BoxFolder folder = new BoxFolder(api, folderId);
-                        Metadata folderMetadata = folder.getMetadata();
+                        Metadata folderMetadata = folder.getMetadata(appProperties.getCitizenFolderMetadataTemplateName(), appProperties.getCitizenFolderMetadataTemplateScope());
                         logger.info(folderMetadata.toString());
                         String folderMetadata_template_id = folderMetadata.getID();
                         logger.info("ID of Folder Metadata Template = {}", folderMetadata_template_id);
@@ -65,11 +51,7 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
                                 BoxFile.Info boxFileInfo = (BoxFile.Info) itemInfo;
                                 String fileId = boxFileInfo.getID();
                                 fileInfo.setFileId(fileId);
-                                CitizenMetadata citizenMetadata = new CitizenMetadata();
-                                citizenMetadata.setFirstName(folderMetadata.getString("/FirstName"));
-                                citizenMetadata.setLastName(folderMetadata.getString("/LastName"));
-                                citizenMetadata.setSsn4(folderMetadata.getString("/last4ofssn"));
-                                citizenMetadata.setDob(LocalDate.parse(folderMetadata.getString("/DOB")));
+                                CitizenMetadata citizenMetadata = getCitizenMetadata(folderMetadata);
                                 fileInfo.setCitizenMetadata(citizenMetadata);
                                 BoxFile boxFile = new BoxFile(api, fileId);
                                 List<DocumentMetadata> documentMetadataList = new ArrayList<>();
@@ -78,11 +60,7 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
                                 JsonArray associationList = JsonArray.readFrom(associationStr);
                                 Iterator<JsonValue> iterator = associationList.iterator();
                                 while (iterator.hasNext()) {
-                                    JsonObject jsonObject = iterator.next().asObject();
-                                    DocumentMetadata documentMetadata = new DocumentMetadata();
-                                    documentMetadata.setCaseId(jsonObject.get("caseId").asString());
-                                    documentMetadata.setProgramId(jsonObject.get("programId").asString());
-                                    documentMetadataList.add(documentMetadata);
+                                    updateDocumentMetadataList(documentMetadataList, iterator);
                                 }
                                 fileInfo.setDocumentMetadataList(documentMetadataList);
                                 files.add(fileInfo);
@@ -102,13 +80,9 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
                         BoxFile.Info boxFileInfo = (BoxFile.Info) boxFile.getInfo();
                         String parentId = boxFileInfo.getParent().getID();
                         BoxFolder parentFolder = new BoxFolder(api, parentId);
-                        Metadata folderMetadata = parentFolder.getMetadata();
+                        Metadata folderMetadata = parentFolder.getMetadata(appProperties.getCitizenFolderMetadataTemplateName(), appProperties.getCitizenFolderMetadataTemplateScope());
                         fileInfo.setFileId(fileId);
-                        CitizenMetadata citizenMetadata = new CitizenMetadata();
-                        citizenMetadata.setFirstName(folderMetadata.getString("/FirstName"));
-                        citizenMetadata.setLastName(folderMetadata.getString("/LastName"));
-                        citizenMetadata.setSsn4(folderMetadata.getString("/last4ofssn"));
-                        citizenMetadata.setDob(LocalDate.parse(folderMetadata.getString("/DOB")));
+                        CitizenMetadata citizenMetadata = getCitizenMetadata(folderMetadata);
                         fileInfo.setCitizenMetadata(citizenMetadata);
                         List<DocumentMetadata> documentMetadataList = new ArrayList<>();
                         Metadata fileMetadata = boxFile.getMetadata();
@@ -116,11 +90,7 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
                         JsonArray associationList = JsonArray.readFrom(associationStr);
                         Iterator<JsonValue> iterator = associationList.iterator();
                         while (iterator.hasNext()) {
-                            JsonObject jsonObject = iterator.next().asObject();
-                            DocumentMetadata documentMetadata = new DocumentMetadata();
-                            documentMetadata.setCaseId(jsonObject.get("caseId").asString());
-                            documentMetadata.setProgramId(jsonObject.get("programId").asString());
-                            documentMetadataList.add(documentMetadata);
+                            updateDocumentMetadataList(documentMetadataList, iterator);
                         }
                         fileInfo.setDocumentMetadataList(documentMetadataList);
                         files.add(fileInfo);
@@ -134,6 +104,46 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
             return new ResponseEntity(null, HttpStatus.CONFLICT);
         }
         return new ResponseEntity(null, HttpStatus.CONFLICT);
+    }
+
+    private BoxDeveloperEditionAPIConnection getBoxDeveloperEditionAPIConnection() {
+        String clientId = appProperties.getClientID();
+        String clientSecret = appProperties.getClientSecret();
+        String enterpriseID = appProperties.getEnterpriseID();
+        String publicKeyID = appProperties.getPublicKeyID();
+        String privateKey = appProperties.getPrivateKey();
+        String passphrase = appProperties.getPassphrase();
+        BoxConfig boxConfig = new BoxConfig(
+                clientId,
+                clientSecret,
+                enterpriseID,
+                publicKeyID,
+                privateKey,
+                passphrase
+        );
+        BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
+        api.asUser(appProperties.getDownloadOneUserID());
+        return api;
+    }
+
+    private void updateDocumentMetadataList(List<DocumentMetadata> documentMetadataList, Iterator<JsonValue> iterator) {
+        JsonObject jsonObject = iterator.next().asObject();
+        DocumentMetadata documentMetadata = new DocumentMetadata();
+        documentMetadata.setCaseId(jsonObject.get("caseId").asString());
+        documentMetadata.setProgramId(jsonObject.get("programId").asString());
+        documentMetadataList.add(documentMetadata);
+    }
+
+    private CitizenMetadata getCitizenMetadata(Metadata folderMetadata) {
+        CitizenMetadata citizenMetadata = new CitizenMetadata();
+        citizenMetadata.setFirstName(folderMetadata.getString("/FirstName"));
+        citizenMetadata.setLastName(folderMetadata.getString("/LastName"));
+        citizenMetadata.setSsn4(folderMetadata.getString("/last4ofssn"));
+        String DOB = folderMetadata.getString("/DOB");
+        String dateOfBirth = DOB.substring(0, DOB.indexOf('T'));
+        LocalDate dob = LocalDate.parse(dateOfBirth, DateTimeFormatter.ISO_LOCAL_DATE);
+        citizenMetadata.setDob(dob);
+        return citizenMetadata;
     }
 
 }

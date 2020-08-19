@@ -31,23 +31,7 @@ public class GetFileApiDelegateImpl implements GetFileApiDelegate {
         logger.info(fileId);
 
         try {
-
-            String clientId = appProperties.getClientID();
-            String clientSecret = appProperties.getClientSecret();
-            String enterpriseID = appProperties.getEnterpriseID();
-            String publicKeyID = appProperties.getPublicKeyID();
-            String privateKey = appProperties.getPrivateKey();
-            String passphrase = appProperties.getPassphrase();
-            BoxConfig boxConfig = new BoxConfig(
-                    clientId,
-                    clientSecret,
-                    enterpriseID,
-                    publicKeyID,
-                    privateKey,
-                    passphrase
-            );
-            BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
-            api.asUser(appProperties.getDownloadOneUserID());
+            BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
 
             BoxFile file = new BoxFile(api, fileId);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -64,6 +48,26 @@ public class GetFileApiDelegateImpl implements GetFileApiDelegate {
             return new ResponseEntity(null, HttpStatus.CONFLICT);
         }
 
+    }
+
+    private BoxDeveloperEditionAPIConnection getBoxDeveloperEditionAPIConnection() {
+        String clientId = appProperties.getClientID();
+        String clientSecret = appProperties.getClientSecret();
+        String enterpriseID = appProperties.getEnterpriseID();
+        String publicKeyID = appProperties.getPublicKeyID();
+        String privateKey = appProperties.getPrivateKey();
+        String passphrase = appProperties.getPassphrase();
+        BoxConfig boxConfig = new BoxConfig(
+                clientId,
+                clientSecret,
+                enterpriseID,
+                publicKeyID,
+                privateKey,
+                passphrase
+        );
+        BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
+        api.asUser(appProperties.getDownloadOneUserID());
+        return api;
     }
 
 }

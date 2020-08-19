@@ -25,22 +25,7 @@ public class CitizenMetadataSearchApiDelegateImpl implements CitizenMetadataSear
     public ResponseEntity<List<FileInfo>> citizenMetadataSearchPost(CitizenMetadataQuery citizenMetadataQuery) {
         logger.info(citizenMetadataQuery.toString());
         try {
-            String clientId = appProperties.getClientID();
-            String clientSecret = appProperties.getClientSecret();
-            String enterpriseID = appProperties.getEnterpriseID();
-            String publicKeyID = appProperties.getPublicKeyID();
-            String privateKey = appProperties.getPrivateKey();
-            String passphrase = appProperties.getPassphrase();
-            BoxConfig boxConfig = new BoxConfig(
-                    clientId,
-                    clientSecret,
-                    enterpriseID,
-                    publicKeyID,
-                    privateKey,
-                    passphrase
-            );
-            BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
-            api.asUser(appProperties.getDownloadOneUserID());
+            BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
 
             String rootFolderId = BoxFolder.getRootFolder(api).getID();
             logger.info("rootFolderId = {}", rootFolderId);
@@ -90,5 +75,25 @@ public class CitizenMetadataSearchApiDelegateImpl implements CitizenMetadataSear
             return new ResponseEntity(null, HttpStatus.CONFLICT);
         }
         return new ResponseEntity(null, HttpStatus.CONFLICT);
+    }
+
+    private BoxDeveloperEditionAPIConnection getBoxDeveloperEditionAPIConnection() {
+        String clientId = appProperties.getClientID();
+        String clientSecret = appProperties.getClientSecret();
+        String enterpriseID = appProperties.getEnterpriseID();
+        String publicKeyID = appProperties.getPublicKeyID();
+        String privateKey = appProperties.getPrivateKey();
+        String passphrase = appProperties.getPassphrase();
+        BoxConfig boxConfig = new BoxConfig(
+                clientId,
+                clientSecret,
+                enterpriseID,
+                publicKeyID,
+                privateKey,
+                passphrase
+        );
+        BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
+        api.asUser(appProperties.getDownloadOneUserID());
+        return api;
     }
 }

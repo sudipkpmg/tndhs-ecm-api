@@ -37,22 +37,7 @@ public class UploadFileApiDelegateImpl implements UploadFileApiDelegate {
 
         try {
 
-            String clientId = appProperties.getClientID();
-            String clientSecret = appProperties.getClientSecret();
-            String enterpriseID = appProperties.getEnterpriseID();
-            String publicKeyID = appProperties.getPublicKeyID();
-            String privateKey = appProperties.getPrivateKey();
-            String passphrase = appProperties.getPassphrase();
-            BoxConfig boxConfig = new BoxConfig(
-                    clientId,
-                    clientSecret,
-                    enterpriseID,
-                    publicKeyID,
-                    privateKey,
-                    passphrase
-            );
-            BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
-            api.asUser(appProperties.getDownloadOneUserID());
+            BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
 
             BoxFolder parentFolder = new BoxFolder(api, boxFolderId);
             BoxFolder.Info info = parentFolder.getInfo();
@@ -102,6 +87,26 @@ public class UploadFileApiDelegateImpl implements UploadFileApiDelegate {
             return new ResponseEntity<>(uploadFileResponse, HttpStatus.CONFLICT);
         }
 
+    }
+
+    private BoxDeveloperEditionAPIConnection getBoxDeveloperEditionAPIConnection() {
+        String clientId = appProperties.getClientID();
+        String clientSecret = appProperties.getClientSecret();
+        String enterpriseID = appProperties.getEnterpriseID();
+        String publicKeyID = appProperties.getPublicKeyID();
+        String privateKey = appProperties.getPrivateKey();
+        String passphrase = appProperties.getPassphrase();
+        BoxConfig boxConfig = new BoxConfig(
+                clientId,
+                clientSecret,
+                enterpriseID,
+                publicKeyID,
+                privateKey,
+                passphrase
+        );
+        BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
+        api.asUser(appProperties.getDownloadOneUserID());
+        return api;
     }
 
 }

@@ -27,22 +27,7 @@ public class CreateFolderApiDelegateImpl implements CreateFolderApiDelegate {
 
         try {
 
-            String clientId = appProperties.getClientID();
-            String clientSecret = appProperties.getClientSecret();
-            String enterpriseID = appProperties.getEnterpriseID();
-            String publicKeyID = appProperties.getPublicKeyID();
-            String privateKey = appProperties.getPrivateKey();
-            String passphrase = appProperties.getPassphrase();
-            BoxConfig boxConfig = new BoxConfig(
-                    clientId,
-                    clientSecret,
-                    enterpriseID,
-                    publicKeyID,
-                    privateKey,
-                    passphrase
-            );
-            BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
-            api.asUser(appProperties.getDownloadOneUserID());
+            BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
 
             String parentFolderId = appProperties.getParentFolderID();
             BoxFolder parentFolder = new BoxFolder(api, parentFolderId);
@@ -59,11 +44,16 @@ public class CreateFolderApiDelegateImpl implements CreateFolderApiDelegate {
             final JsonObject jsonObject = new JsonObject();
             jsonObject.add("FirstName", folderCreationRequest.getCitizenMetadata().getFirstName());
             jsonObject.add("LastName", folderCreationRequest.getCitizenMetadata().getLastName());
-            jsonObject.add("DOB", folderCreationRequest.getCitizenMetadata().getDob().toString());
+            String dob = folderCreationRequest.getCitizenMetadata().getDob().toString();
+            String ts = "T00:00:00-00:00";
+            String dobTS = String.format("%s%s", dob, ts);
+            jsonObject.add("DOB", dobTS);
+            jsonObject.add("clientid", folderCreationRequest.getCitizenMetadata().getMpiId());
             jsonObject.add("last4ofssn", folderCreationRequest.getCitizenMetadata().getSsn4());
 
             Metadata metadata = new Metadata(jsonObject);
-            boxFolder.createMetadata(metadata);
+//            boxFolder.createMetadata(metadata);
+            boxFolder.createMetadata(appProperties.getCitizenFolderMetadataTemplateName(), appProperties.getCitizenFolderMetadataTemplateScope(), metadata);
 
             FolderCreationSuccessResponse folderCreationSuccessResponse = new FolderCreationSuccessResponse();
             folderCreationSuccessResponse.setId(folderID);
@@ -87,6 +77,26 @@ public class CreateFolderApiDelegateImpl implements CreateFolderApiDelegate {
             return new ResponseEntity<>(folderCreationSuccessResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    private BoxDeveloperEditionAPIConnection getBoxDeveloperEditionAPIConnection() {
+        String clientId = appProperties.getClientID();
+        String clientSecret = appProperties.getClientSecret();
+        String enterpriseID = appProperties.getEnterpriseID();
+        String publicKeyID = appProperties.getPublicKeyID();
+        String privateKey = appProperties.getPrivateKey();
+        String passphrase = appProperties.getPassphrase();
+        BoxConfig boxConfig = new BoxConfig(
+                clientId,
+                clientSecret,
+                enterpriseID,
+                publicKeyID,
+                privateKey,
+                passphrase
+        );
+        BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
+        api.asUser(appProperties.getDownloadOneUserID());
+        return api;
     }
 
 }
