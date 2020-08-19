@@ -156,38 +156,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FileArray'
-  /citizen_metadata_search:
-    post:
-      description: Get files based on citizen metadata
-      requestBody:
-        description: query using citizen metadata
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CitizenMetadataQuery'
-      responses:
-        '200':
-          description: File(s) obtained
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FileArray'
-  /document_metadata_search:
-    post:
-      description: Get files based on document metadata
-      requestBody:
-        description: query using document metadata
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DocumentMetadataQuery'
-      responses:
-        '200':
-          description: File(s) obtained
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FileArray'
+#  /citizen_metadata_search:
+#    post:
+#      description: Get files based on citizen metadata
+#      requestBody:
+#        description: query using citizen metadata
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/CitizenMetadataQuery'
+#      responses:
+#        '200':
+#          description: File(s) obtained
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/FileArray'
+#  /document_metadata_search:
+#    post:
+#      description: Get files based on document metadata
+#      requestBody:
+#        description: query using document metadata
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/DocumentMetadataQuery'
+#      responses:
+#        '200':
+#          description: File(s) obtained
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/FileArray'
 #  /update_citizen_metadata:
 #    put:
 #      description: Update citizen metadata of file
@@ -203,21 +203,21 @@ paths:
 #            application/json:
 #              schema:
 #                $ref: '#/components/schemas/FileInfo'
-  /update_document_metadata:
-    post:
-      description: Update document metadata of file
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DocumentMetadataUpdateRequest'
-      responses:
-        '200':
-          description: Metadata added
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FileInfo'
+#  /update_document_metadata:
+#    post:
+#      description: Update document metadata of file
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/DocumentMetadataUpdateRequest'
+#      responses:
+#        '200':
+#          description: Metadata added
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/FileInfo'
 components:
   schemas:
     FolderCreationRequest:
@@ -312,43 +312,45 @@ components:
       title: Search criterion
       type: object
       properties:
-        searchCondition:
+        fileName:
+          type: string
+        folderId:
           type: string
         searchType:
           type: string
           enum:
             - file
             - folder
-    CitizenMetadataQuery:
-      title: Query for folder or file using Citizen Metadata
-      type: object
-      properties:
-        logon_user_id:
-          type: string
-        mpi_id:
-          type: string
-        sys_id:
-          type: string
-        lastName:
-          type: string
-        firstName:
-          type: string
-        last4SSN:
-          type: string
-        dob:
-          type: string
-    DocumentMetadataQuery:
-      title: Query for file using Document Metadata
-      type: object
-      properties:
-        program_id:
-          type: string
-        case_id:
-          type: string
-        documentTypeMetdata:
-          type: object
-        confidentialityTypeMetadata:
-          type: object
+#    CitizenMetadataQuery:
+#      title: Query for folder or file using Citizen Metadata
+#      type: object
+#      properties:
+#        logon_user_id:
+#          type: string
+#        mpi_id:
+#          type: string
+#        sys_id:
+#          type: string
+#        lastName:
+#          type: string
+#        firstName:
+#          type: string
+#        last4SSN:
+#          type: string
+#        dob:
+#          type: string
+#    DocumentMetadataQuery:
+#      title: Query for file using Document Metadata
+#      type: object
+#      properties:
+#        program_id:
+#          type: string
+#        case_id:
+#          type: string
+#        documentTypeMetdata:
+#          type: object
+#        confidentialityTypeMetadata:
+#          type: object
     FileDownloadData:
       title: File content
       type: object
@@ -365,6 +367,8 @@ components:
       type: object
       properties:
         fileId:
+          type: string
+        fileName:
           type: string
         citizenMetadata:
           $ref: '#/components/schemas/CitizenMetadata'

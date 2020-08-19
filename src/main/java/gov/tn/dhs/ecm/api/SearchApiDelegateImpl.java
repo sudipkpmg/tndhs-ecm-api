@@ -37,7 +37,7 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
             BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
             switch (query.getSearchType()) {
                 case FOLDER: {
-                    String folderId = query.getSearchCondition();
+                    String folderId = query.getFolderId();
                     try {
                         BoxFolder folder = new BoxFolder(api, folderId);
                         Metadata folderMetadata = folder.getMetadata(appProperties.getCitizenFolderMetadataTemplateName(), appProperties.getCitizenFolderMetadataTemplateScope());
@@ -72,28 +72,10 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
                     }
                 }
                 case FILE: {
-                    String fileId = query.getSearchCondition();
+                    // TODO
+                    String fileId = query.getFileName();
                     try {
                         List<FileInfo> files = new ArrayList<>();
-                        FileInfo fileInfo = new FileInfo();
-                        BoxFile boxFile = new BoxFile(api, fileId);
-                        BoxFile.Info boxFileInfo = (BoxFile.Info) boxFile.getInfo();
-                        String parentId = boxFileInfo.getParent().getID();
-                        BoxFolder parentFolder = new BoxFolder(api, parentId);
-                        Metadata folderMetadata = parentFolder.getMetadata(appProperties.getCitizenFolderMetadataTemplateName(), appProperties.getCitizenFolderMetadataTemplateScope());
-                        fileInfo.setFileId(fileId);
-                        CitizenMetadata citizenMetadata = getCitizenMetadata(folderMetadata);
-                        fileInfo.setCitizenMetadata(citizenMetadata);
-                        List<DocumentMetadata> documentMetadataList = new ArrayList<>();
-                        Metadata fileMetadata = boxFile.getMetadata();
-                        String associationStr = fileMetadata.getValue("/AssociationMetadata").asString();
-                        JsonArray associationList = JsonArray.readFrom(associationStr);
-                        Iterator<JsonValue> iterator = associationList.iterator();
-                        while (iterator.hasNext()) {
-                            updateDocumentMetadataList(documentMetadataList, iterator);
-                        }
-                        fileInfo.setDocumentMetadataList(documentMetadataList);
-                        files.add(fileInfo);
                         return new ResponseEntity(files, HttpStatus.OK);
                     } catch (BoxAPIException e) {
                         return new ResponseEntity(null, HttpStatus.CONFLICT);
