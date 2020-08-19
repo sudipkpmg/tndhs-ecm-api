@@ -44,14 +44,14 @@ public class CreateFolderApiDelegateImpl implements CreateFolderApiDelegate {
             BoxDeveloperEditionAPIConnection api = BoxDeveloperEditionAPIConnection.getAppEnterpriseConnection(boxConfig);
             api.asUser(appProperties.getDownloadOneUserID());
 
-            BoxFolder rootFolder = BoxFolder.getRootFolder(api);
+            String parentFolderId = appProperties.getParentFolderID();
+            BoxFolder parentFolder = new BoxFolder(api, parentFolderId);
 
             String folderID = "No folder created";
 
             String folderName = folderCreationRequest.getCitizenMetadata().getMpiId();
-//            String folderName = "707349658850";
 
-            BoxFolder.Info childFolderInfo = rootFolder.createFolder(folderName);
+            BoxFolder.Info childFolderInfo = parentFolder.createFolder(folderName);
             folderID = childFolderInfo.getID();
 
             BoxFolder boxFolder = new BoxFolder(api, folderID);
