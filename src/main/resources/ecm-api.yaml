@@ -45,7 +45,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientError'
-  '/get_file/{fileId}':
+  /get_file/{fileId}:
     get:
       description: Get file
       parameters:
@@ -381,10 +381,10 @@ components:
 #          type: string
 #        metadata:
 #          $ref: '#/components/schemas/CitizenMetadata'
-    DocumentMetadataUpdateRequest:
-      type: object
-      properties:
-        fileId:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/DocumentMetadata'
+#    DocumentMetadataUpdateRequest:
+#      type: object
+#      properties:
+#        fileId:
+#          type: string
+#        metadata:
+#          $ref: '#/components/schemas/DocumentMetadata'
