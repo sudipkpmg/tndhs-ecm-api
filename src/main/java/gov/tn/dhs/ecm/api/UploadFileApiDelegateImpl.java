@@ -47,7 +47,7 @@ public class UploadFileApiDelegateImpl implements UploadFileApiDelegate {
 
             try {
                 InputStream inputStream = file.getInputStream();
-                String fileName = file.getName();
+                String fileName = file.getOriginalFilename();
                 BoxFile.Info newFileInfo = parentFolder.uploadFile(inputStream, fileName);
                 inputStream.close();
                 fileId = newFileInfo.getID();

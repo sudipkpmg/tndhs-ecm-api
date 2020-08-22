@@ -47,22 +47,7 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
                         List<FileInfo> files = new ArrayList<>();
                         for (BoxItem.Info itemInfo : folder.getChildren()) {
                             if (itemInfo instanceof BoxFile.Info) {
-                                FileInfo fileInfo = new FileInfo();
-                                BoxFile.Info boxFileInfo = (BoxFile.Info) itemInfo;
-                                String fileId = boxFileInfo.getID();
-                                fileInfo.setFileId(fileId);
-                                CitizenMetadata citizenMetadata = getCitizenMetadata(folderMetadata);
-                                fileInfo.setCitizenMetadata(citizenMetadata);
-                                BoxFile boxFile = new BoxFile(api, fileId);
-                                List<DocumentMetadata> documentMetadataList = new ArrayList<>();
-                                Metadata fileMetadata = boxFile.getMetadata();
-                                String associationStr = fileMetadata.getValue("/AssociationMetadata").asString();
-                                JsonArray associationList = JsonArray.readFrom(associationStr);
-                                Iterator<JsonValue> iterator = associationList.iterator();
-                                while (iterator.hasNext()) {
-                                    updateDocumentMetadataList(documentMetadataList, iterator);
-                                }
-                                fileInfo.setDocumentMetadataList(documentMetadataList);
+                                FileInfo fileInfo = getFileInfo(api, folderMetadata, (BoxFile.Info) itemInfo);
                                 files.add(fileInfo);
                             }
                         }
@@ -72,20 +57,53 @@ public class SearchApiDelegateImpl implements SearchApiDelegate {
                     }
                 }
                 case FILE: {
-                    // TODO
-                    String fileId = query.getFileName();
-                    try {
-                        List<FileInfo> files = new ArrayList<>();
-                        return new ResponseEntity(files, HttpStatus.OK);
-                    } catch (BoxAPIException e) {
-                        return new ResponseEntity(null, HttpStatus.CONFLICT);
+                    String folderId = query.getFolderId();
+                    BoxFolder folder = new BoxFolder(api, folderId);
+                    Metadata folderMetadata = folder.getMetadata(appProperties.getCitizenFolderMetadataTemplateName(), appProperties.getCitizenFolderMetadataTemplateScope());
+                    long offsetValue = 0;
+                    long limitValue = 20;
+                    BoxSearch boxSearch = new BoxSearch(api);
+                    BoxSearchParameters searchParams = new BoxSearchParameters();
+                    searchParams.setQuery(query.getFileName());
+                    List<String> ancestorFolderIds = new ArrayList<String>();
+                    ancestorFolderIds.add(query.getFolderId());
+                    searchParams.setAncestorFolderIds(ancestorFolderIds);
+                    searchParams.setType("file");
+                    PartialCollection<BoxItem.Info> searchResults = boxSearch.searchRange(offsetValue, limitValue, searchParams);
+                    List<FileInfo> files = new ArrayList<>();
+                    for (BoxItem.Info info : searchResults) {
+                        FileInfo fileInfo = getFileInfo(api, folderMetadata, (BoxFile.Info) info);
+                        files.add(fileInfo);
                     }
+                    return new ResponseEntity(files, HttpStatus.OK);
                 }
             }
         } catch (Exception ex) {
             return new ResponseEntity(null, HttpStatus.CONFLICT);
         }
         return new ResponseEntity(null, HttpStatus.CONFLICT);
+    }
+
+    private FileInfo getFileInfo(BoxDeveloperEditionAPIConnection api, Metadata folderMetadata, BoxFile.Info info) {
+        FileInfo fileInfo = new FileInfo();
+        BoxFile.Info boxFileInfo = info;
+        String fileId = boxFileInfo.getID();
+        String name = boxFileInfo.getName();
+        fileInfo.setFileId(fileId);
+        fileInfo.setFileName(name);
+        CitizenMetadata citizenMetadata = getCitizenMetadata(folderMetadata);
+        fileInfo.setCitizenMetadata(citizenMetadata);
+        BoxFile boxFile = new BoxFile(api, fileId);
+        List<DocumentMetadata> documentMetadataList = new ArrayList<>();
+        Metadata fileMetadata = boxFile.getMetadata();
+        String associationStr = fileMetadata.getValue("/AssociationMetadata").asString();
+        JsonArray associationList = JsonArray.readFrom(associationStr);
+        Iterator<JsonValue> iterator = associationList.iterator();
+        while (iterator.hasNext()) {
+            updateDocumentMetadataList(documentMetadataList, iterator);
+        }
+        fileInfo.setDocumentMetadataList(documentMetadataList);
+        return fileInfo;
     }
 
     private BoxDeveloperEditionAPIConnection getBoxDeveloperEditionAPIConnection() {
