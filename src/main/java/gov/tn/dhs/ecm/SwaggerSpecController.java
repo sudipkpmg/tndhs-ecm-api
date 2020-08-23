@@ -23,7 +23,7 @@ public class SwaggerSpecController {
     public String showDocs() {
         logger.info("Received API Doc request");
         String data = "Doc not found";
-        Resource resource = new ClassPathResource("classpath:data.txt");
+        Resource resource = new ClassPathResource("classpath:ecm-api.yaml");
         try {
             InputStream inputStream = resource.getInputStream();
             byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
