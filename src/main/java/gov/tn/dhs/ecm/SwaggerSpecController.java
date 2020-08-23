@@ -6,10 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,9 +26,9 @@ public class SwaggerSpecController {
     public String showDocs() {
         logger.info("Received API Doc request");
         String data = "Doc not found";
-        Resource resource = new ClassPathResource("classpath:ecm-api.yaml");
         try {
-            InputStream inputStream = resource.getInputStream();
+            File file = ResourceUtils.getFile("classpath:ecm-api.yaml");
+            InputStream inputStream = new FileInputStream(file);
             byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
             data = new String(bdata, StandardCharsets.UTF_8);
         } catch (IOException e) {
