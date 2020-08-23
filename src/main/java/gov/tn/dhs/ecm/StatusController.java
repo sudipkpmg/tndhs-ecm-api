@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class HomeController {
+public class StatusController {
 
     private static Logger logger = LoggerFactory.getLogger(SwaggerSpecController.class);
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "/ecm-api/v1", method = RequestMethod.GET)
     public String index() {
         logger.info("Received status request");
-        String msg = "tndhs ecm-api service is running";
+        String msg = "TNDHS ECM API Service is running";
         return msg;
     }
 

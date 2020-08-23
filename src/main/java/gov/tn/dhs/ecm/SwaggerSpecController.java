@@ -19,8 +19,9 @@ public class SwaggerSpecController {
 
     private static Logger logger = LoggerFactory.getLogger(SwaggerSpecController.class);
 
-    @RequestMapping(value = "/api-docs", method = RequestMethod.GET)
+    @RequestMapping(value = "/ecm-api/v1/api-docs", method = RequestMethod.GET)
     public String showDocs() {
+        logger.info("Received API Doc request");
         String data = "Doc not found";
         Resource resource = new ClassPathResource("classpath:data.txt");
         try {
