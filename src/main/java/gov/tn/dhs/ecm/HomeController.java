@@ -14,7 +14,7 @@ public class HomeController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
         logger.info("Received status request");
-        String msg = "tndhs ecm-api service is running";
+        String msg = "TNDHS ecm-api service is running";
         return msg;
     }
 

@@ -52,7 +52,6 @@ public class CreateFolderApiDelegateImpl implements CreateFolderApiDelegate {
             jsonObject.add("last4ofssn", folderCreationRequest.getCitizenMetadata().getSsn4());
 
             Metadata metadata = new Metadata(jsonObject);
-//            boxFolder.createMetadata(metadata);
             boxFolder.createMetadata(appProperties.getCitizenFolderMetadataTemplateName(), appProperties.getCitizenFolderMetadataTemplateScope(), metadata);
 
             FolderCreationSuccessResponse folderCreationSuccessResponse = new FolderCreationSuccessResponse();
