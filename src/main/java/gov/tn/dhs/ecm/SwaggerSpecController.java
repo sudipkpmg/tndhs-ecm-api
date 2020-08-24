@@ -3,6 +3,7 @@ package gov.tn.dhs.ecm;
 import gov.tn.dhs.ecm.api.SearchApiDelegateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
@@ -22,13 +23,15 @@ public class SwaggerSpecController {
 
     private static Logger logger = LoggerFactory.getLogger(SwaggerSpecController.class);
 
+    @Value("classpath:ecm-api.yaml")
+    private Resource resource;
+
     @RequestMapping(value = "/ecm-api/v1/api-docs", method = RequestMethod.GET)
     public String showDocs() {
         logger.info("Received API Doc request");
         String data = "Doc not found";
         try {
-            File file = ResourceUtils.getFile("classpath:ecm-api.yaml");
-            InputStream inputStream = new FileInputStream(file);
+            InputStream inputStream = resource.getInputStream();
             byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
             data = new String(bdata, StandardCharsets.UTF_8);
         } catch (IOException e) {
