@@ -39,53 +39,47 @@ public class UploadFileApiDelegateImpl implements UploadFileApiDelegate {
 
             BoxDeveloperEditionAPIConnection api = getBoxDeveloperEditionAPIConnection();
 
-            BoxFolder parentFolder = new BoxFolder(api, boxFolderId);
-            BoxFolder.Info info = parentFolder.getInfo();
-            String parentId = info.getID();
-
-            String fileId = "No File Created";
-
+            BoxFolder parentFolder = null;
             try {
-                InputStream inputStream = file.getInputStream();
+                parentFolder = new BoxFolder(api, boxFolderId);
+                BoxFolder.Info info = parentFolder.getInfo();
+                logger.info("Parent Folder with ID {} and name {} found", boxFolderId, info.getName());
+            } catch (BoxAPIException e) {
+                UploadFileResponse uploadFileResponse = new UploadFileResponse();
+                uploadFileResponse.setStatus("Folder not found");
+                return new ResponseEntity<>(uploadFileResponse, HttpStatus.BAD_REQUEST);
+            }
+            String fileId = "No File Created";
+            BoxFile.Info newFileInfo = null;
+            try (InputStream inputStream = file.getInputStream()) {
                 String fileName = file.getOriginalFilename();
-                BoxFile.Info newFileInfo = parentFolder.uploadFile(inputStream, fileName);
-                inputStream.close();
-                fileId = newFileInfo.getID();
-
-                BoxFile boxFile = new BoxFile(api, fileId);
-                final JsonObject jsonObject = new JsonObject();
-                jsonObject.add("programId", programId);
-                jsonObject.add("caseId", caseId);
-                JsonArray associationList = new JsonArray();
-                associationList.add(jsonObject);
-                final JsonObject associationObj = new JsonObject();
-                String associatonListStr = associationList.toString();
-                associationObj.add("AssociationMetadata", associatonListStr);
-                Metadata metadata = new Metadata(associationObj);
-                boxFile.createMetadata(metadata);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-                throw new Exception();
+                try {
+                    newFileInfo = parentFolder.uploadFile(inputStream, fileName);
+                } catch (BoxAPIException e) {
+                    UploadFileResponse uploadFileResponse = new UploadFileResponse();
+                    uploadFileResponse.setStatus("File with the same name already exists");
+                    return new ResponseEntity<>(uploadFileResponse, HttpStatus.CONFLICT);
+                }
             }
+            fileId = newFileInfo.getID();
+            BoxFile boxFile = new BoxFile(api, fileId);
+            final JsonObject jsonObject = new JsonObject();
+            jsonObject.add("programId", programId);
+            jsonObject.add("caseId", caseId);
+            JsonArray associationList = new JsonArray();
+            associationList.add(jsonObject);
+            final JsonObject associationObj = new JsonObject();
+            String associatonListStr = associationList.toString();
+            associationObj.add("AssociationMetadata", associatonListStr);
+            Metadata metadata = new Metadata(associationObj);
+            boxFile.createMetadata(metadata);
             UploadFileResponse uploadFileResponse = new UploadFileResponse();
-            uploadFileResponse.setDocumentId(fileId);
+            uploadFileResponse.setStatus("File upload completed");
+            uploadFileResponse.setFileId(fileId);
             return new ResponseEntity<>(uploadFileResponse, HttpStatus.OK);
-
-        } catch (BoxAPIException be) {
-            if (be.getResponseCode() == 409) {
-                UploadFileResponse uploadFileResponse = new UploadFileResponse();
-                uploadFileResponse.setDocumentId("File already exists!");
-                return new ResponseEntity<>(uploadFileResponse, HttpStatus.CONFLICT);
-            }
-            else {
-                UploadFileResponse uploadFileResponse = new UploadFileResponse();
-                uploadFileResponse.setDocumentId("Other Error!");
-                return new ResponseEntity<>(uploadFileResponse, HttpStatus.CONFLICT);
-            }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             UploadFileResponse uploadFileResponse = new UploadFileResponse();
-            uploadFileResponse.setDocumentId("Other Error!");
+            uploadFileResponse.setStatus(ex.getMessage());
             return new ResponseEntity<>(uploadFileResponse, HttpStatus.CONFLICT);
         }
 

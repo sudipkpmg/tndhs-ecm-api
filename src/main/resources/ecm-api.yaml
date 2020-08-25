@@ -128,7 +128,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadFileResponse'
-        '401':
+        '400':
           description: Folder error
           content:
             application/json:
@@ -237,9 +237,12 @@ components:
       title: Response for successful file upload
       type: object
       properties:
-        documentId:
+        Status:
           type: string
-          description: Document ID of uploaded content
+          description: Status message for operation
+        FileId:
+          type: string
+          description: File ID of uploaded content
     ClientError:
       title: Generic error
       type: object
