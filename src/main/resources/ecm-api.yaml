@@ -73,7 +73,7 @@ paths:
               schema:
                 type: integer
               description: Time in seconds after which the file will be available for the client to download.
-        default:
+        '404':
           description: File not found
           content:
             application/json:
@@ -107,7 +107,7 @@ paths:
               schema:
                 type: integer
               description: Time in seconds after which the file will be available for the client to download.
-        default:
+        '404':
           description: File not found
           content:
             application/json:
@@ -134,7 +134,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadFileResponse'
-        '402':
+        '409':
           description: File exists error
           content:
             application/json:
@@ -155,69 +155,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileArray'
-#  /citizen_metadata_search:
-#    post:
-#      description: Get files based on citizen metadata
-#      requestBody:
-#        description: query using citizen metadata
-#        content:
-#          application/json:
-#            schema:
-#              $ref: '#/components/schemas/CitizenMetadataQuery'
-#      responses:
-#        '200':
-#          description: File(s) obtained
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/FileArray'
-#  /document_metadata_search:
-#    post:
-#      description: Get files based on document metadata
-#      requestBody:
-#        description: query using document metadata
-#        content:
-#          application/json:
-#            schema:
-#              $ref: '#/components/schemas/DocumentMetadataQuery'
-#      responses:
-#        '200':
-#          description: File(s) obtained
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/FileArray'
-#  /update_citizen_metadata:
-#    put:
-#      description: Update citizen metadata of file
-#      requestBody:
-#        content:
-#          application/json:
-#            schema:
-#              $ref: '#/components/schemas/CitizenMetadataAddOrUpdateRequest'
-#      responses:
-#        '200':
-#          description: Metadata added
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/FileInfo'
-#  /update_document_metadata:
-#    post:
-#      description: Update document metadata of file
-#      requestBody:
-#        content:
-#          application/json:
-#            schema:
-#              $ref: '#/components/schemas/DocumentMetadataUpdateRequest'
-#      responses:
-#        '200':
-#          description: Metadata added
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/FileInfo'
+                $ref: '#/components/schemas/SearchResult'
 components:
   schemas:
     FolderCreationRequest:
@@ -277,19 +215,6 @@ components:
           type: string
           description: Last 4 digits of SSN
           pattern: "\\d{4}"
-    DocumentMetadataList:
-      title: Document metadata list
-      type: array
-      items:
-        $ref: '#/components/schemas/DocumentMetadata'
-    DocumentMetadata:
-      title: Document metadata
-      type: object
-      properties:
-        program_id:
-          type: string
-        case_id:
-          type: string
     FileDownloadRequest:
       type: object
       properties:
@@ -298,19 +223,11 @@ components:
     FileUploadData:
       type: object
       properties:
+        boxFolderId:
+          type: string
         file:
           type: string
           format: binary
-        boxFolderId:
-          type: string
-        programId:
-          type: string
-        caseId:
-          type: string
-        documentTypeMetadata:
-          type: object
-        confidentialityMetadata:
-          type: object
     Query:
       title: Search criterion
       type: object
@@ -324,36 +241,14 @@ components:
           enum:
             - file
             - folder
-#    CitizenMetadataQuery:
-#      title: Query for folder or file using Citizen Metadata
-#      type: object
-#      properties:
-#        logon_user_id:
-#          type: string
-#        mpi_id:
-#          type: string
-#        sys_id:
-#          type: string
-#        lastName:
-#          type: string
-#        firstName:
-#          type: string
-#        last4SSN:
-#          type: string
-#        dob:
-#          type: string
-#    DocumentMetadataQuery:
-#      title: Query for file using Document Metadata
-#      type: object
-#      properties:
-#        program_id:
-#          type: string
-#        case_id:
-#          type: string
-#        documentTypeMetdata:
-#          type: object
-#        confidentialityTypeMetadata:
-#          type: object
+        offset:
+          type: integer
+          default: 0
+          example: 0
+        limit:
+          type: integer
+          default: 20
+          example: 20
     FileDownloadData:
       title: File content
       type: object
@@ -361,6 +256,17 @@ components:
         file:
           type: string
           format: binary
+    SearchResult:
+      title: Search Response
+      type: object
+      properties:
+        complete:
+          type: string
+          enum:
+            - true
+            - false
+        data:
+          $ref: '#/components/schemas/FileArray'
     FileArray:
       title: Array of files
       type: array
@@ -375,19 +281,3 @@ components:
           type: string
         citizenMetadata:
           $ref: '#/components/schemas/CitizenMetadata'
-        documentMetadataList:
-          $ref: '#/components/schemas/DocumentMetadataList'
-#    CitizenMetadataAddOrUpdateRequest:
-#      type: object
-#      properties:
-#        folderId:
-#          type: string
-#        metadata:
-#          $ref: '#/components/schemas/CitizenMetadata'
-#    DocumentMetadataUpdateRequest:
-#      type: object
-#      properties:
-#        fileId:
-#          type: string
-#        metadata:
-#          $ref: '#/components/schemas/DocumentMetadata'
