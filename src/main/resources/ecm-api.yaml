@@ -279,5 +279,7 @@ components:
           type: string
         fileName:
           type: string
+        itemType:
+          type: string
         citizenMetadata:
           $ref: '#/components/schemas/CitizenMetadata'
