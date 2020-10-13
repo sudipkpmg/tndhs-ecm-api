@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class StatusController {
 
-    private static Logger logger = LoggerFactory.getLogger(SwaggerSpecController.class);
+    private static Logger logger = LoggerFactory.getLogger(StatusController.class);
 
     @RequestMapping(value = "/ecm-api/v1", method = RequestMethod.GET)
     public String index() {

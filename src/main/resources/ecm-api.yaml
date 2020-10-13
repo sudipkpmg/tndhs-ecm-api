@@ -113,49 +113,49 @@ paths:
             application/json:
               schema:
                 type: string
-  /upload_file:
-    post:
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/FileUploadData'
-        required: true
-      responses:
-        '200':
-          description: Document ID of uploaded content is returned
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UploadFileResponse'
-        '400':
-          description: Folder error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UploadFileResponse'
-        '409':
-          description: File exists error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UploadFileResponse'
-  /search:
-    post:
-      description: Get file
-      requestBody:
-        description: query for file or folder
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Query'
-      responses:
-        '200':
-          description: File or Folder obtained
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SearchResult'
+#  /upload_file:
+#    post:
+#      requestBody:
+#        content:
+#          multipart/form-data:
+#            schema:
+#              $ref: '#/components/schemas/FileUploadData'
+#        required: true
+#      responses:
+#        '200':
+#          description: Document ID of uploaded content is returned
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/UploadFileResponse'
+#        '400':
+#          description: Folder error
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/UploadFileResponse'
+#        '409':
+#          description: File exists error
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/UploadFileResponse'
+#  /search:
+#    post:
+#      description: Get file
+#      requestBody:
+#        description: query for file or folder
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/Query'
+#      responses:
+#        '200':
+#          description: File or Folder obtained
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/SearchResult'
 components:
   schemas:
     FolderCreationRequest:
